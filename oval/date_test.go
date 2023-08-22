@@ -93,7 +93,7 @@ func TestDebianDates(t *testing.T) {
 	}
 }
 
-func TestUbuntuDates(t *testing.T) {
+func TestOldOvalUbuntuDates(t *testing.T) {
 	var tt = []time.Time{
 		time.Time{}, // First entry has no date attached.
 		time.Date(2015, time.Month(2), 23, 0, 0, 0, 0, time.UTC),
@@ -105,6 +105,46 @@ func TestUbuntuDates(t *testing.T) {
 		time.Date(2008, time.Month(11), 18, 16, 0, 0, 0, time.UTC),
 		time.Date(2018, time.Month(11), 18, 19, 29, 0, 0, time.UTC),
 		time.Date(2009, time.Month(4), 23, 19, 30, 0, 0, time.UTC),
+	}
+
+	f, err := os.Open("../testdata/old.com.ubuntu.bionic.cve.oval.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	var root Root
+	if err := xml.NewDecoder(f).Decode(&root); err != nil {
+		t.Fatal(err)
+	}
+	for i, tc := range tt {
+		def := &root.Definitions.Definitions[i]
+		a := def.Advisory
+		if got, want := a.PublicDate.Date, tc; !cmp.Equal(got, want) {
+			t.Errorf("def #%d: %s:\n%v", i, def.Title, cmp.Diff(got, want))
+		}
+	}
+}
+
+func TestUbuntuDates(t *testing.T) {
+	var tt = []time.Time{
+		time.Time{}, // First entry has no date attached.
+		time.Date(2019, time.Month(10), 23, 18, 15, 0, 0, time.UTC),
+		time.Date(2023, time.Month(1), 17, 20, 15, 0, 0, time.UTC),
+		time.Date(2007, time.Month(1), 16, 23, 28, 0, 0, time.UTC),
+		time.Date(2007, time.Month(9), 26, 23, 17, 0, 0, time.UTC),
+		time.Date(2008, time.Month(11), 18, 16, 0, 0, 0, time.UTC),
+		time.Date(2008, time.Month(11), 18, 16, 0, 0, 0, time.UTC),
+		time.Date(2008, time.Month(11), 18, 16, 0, 0, 0, time.UTC),
+		time.Date(2008, time.Month(11), 18, 16, 0, 0, 0, time.UTC),
+		time.Date(2018, time.Month(11), 18, 19, 29, 0, 0, time.UTC),
+		time.Date(2009, time.Month(12), 4, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, time.Month(10), 21, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, time.Month(10), 21, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, time.Month(10), 21, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, time.Month(10), 21, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, time.Month(10), 21, 0, 0, 0, 0, time.UTC),
+		time.Date(2009, time.Month(11), 03, 0, 0, 0, 0, time.UTC), // 16
 	}
 
 	f, err := os.Open("../testdata/com.ubuntu.bionic.cve.oval.xml")
